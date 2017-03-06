@@ -1,5 +1,5 @@
-import React,{Component} from 'react';
-import {Field,reduxForm} from 'redux-form';
+import React,{Component,PropTypes} from 'react';
+import {reduxForm} from 'redux-form';
 import { createPosts } from '../actions/index';
 import {Link} from 'react-router';
 
@@ -7,12 +7,21 @@ import {Link} from 'react-router';
 
 
 class PostsNew extends Component{
-
+  static contextTypes = {
+    router: PropTypes.object// hacemos referencia al objeto router de nuestro parent OMG esto no lo sabia
+  }
+  onSubmit(props){
+    this.props.createPosts(props)
+    .then(()=>{
+      //in this section us suposed that the blog post has been added
+      this.context.router.push('/');
+    });
+  }
   render(){
     const { fields: {title,categories,content}, handleSubmit} = this.props;
-
+    console.log(title);
     return(
-      <form onSubmit={handleSubmit(this.props.createPosts)} >
+      <form onSubmit={handleSubmit(this.onSubmit.bind(this))} >
         <h3>Create a New Post</h3>
         <div className={`form-group ${title.touched && title.invalid ? 'has-danger':''}`}>
           <label>Title</label>
@@ -57,7 +66,7 @@ function validate(values){
   if(!values.title){
     errors.title = "Enter a username";
   }
-  if(!re.test(values.categories) || !values.categories){
+  if(!values.categories){
     errors.categories = "Enter Categories";
   }
   if(!values.content){
